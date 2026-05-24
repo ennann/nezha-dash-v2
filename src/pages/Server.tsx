@@ -317,7 +317,7 @@ export default function Servers() {
 							},
 						)}
 					>
-						<MapIcon className={cn("size-[13px]")} />
+						<MapIcon className="size-[13px]" />
 					</button>
 					<button
 						onClick={() => {
@@ -338,7 +338,7 @@ export default function Servers() {
 							},
 						)}
 					>
-						<ChartBarSquareIcon className={cn("size-[13px]")} />
+						<ChartBarSquareIcon className="size-[13px]" />
 					</button>
 					<button
 						onClick={() => {
@@ -356,11 +356,7 @@ export default function Servers() {
 							},
 						)}
 					>
-						<ViewColumnsIcon
-							className={cn("size-[13px]", {
-								"text-white": inline === "1",
-							})}
-						/>
+						<ViewColumnsIcon className="size-[13px]" />
 					</button>
 					<GroupSwitch
 						tabs={groupTabs}

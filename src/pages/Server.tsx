@@ -3,6 +3,7 @@ import {
 	ArrowsUpDownIcon,
 	ArrowUpIcon,
 	ChartBarSquareIcon,
+	CheckIcon,
 	MapIcon,
 	ViewColumnsIcon,
 } from "@heroicons/react/20/solid";
@@ -16,19 +17,11 @@ import ServerCard from "@/components/ServerCard";
 import ServerCardInline from "@/components/ServerCardInline";
 import ServerOverview from "@/components/ServerOverview";
 import { ServiceTracker } from "@/components/ServiceTracker";
-import { Label } from "@/components/ui/label";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { SORT_ORDERS, SORT_TYPES } from "@/context/sort-context";
 import { useSort } from "@/hooks/use-sort";
 import { useStatus } from "@/hooks/use-status";
@@ -57,6 +50,12 @@ export default function Servers() {
 		(window.CustomBackgroundImage as string) !== ""
 			? window.CustomBackgroundImage
 			: undefined;
+
+	const currentSortTypeLabel =
+		sortType === "default"
+			? "Default"
+			: sortType.charAt(0).toUpperCase() + sortType.slice(1);
+	const _currentSortOrderLabel = sortOrder === "asc" ? "Asc" : "Desc";
 
 	const restoreScrollPosition = useCallback(() => {
 		const savedPosition = sessionStorage.getItem("scrollPosition");
@@ -367,69 +366,126 @@ export default function Servers() {
 				<Popover onOpenChange={setSettingsOpen}>
 					<PopoverTrigger asChild>
 						<button
+							aria-label="Open sort settings"
 							className={cn(
-								"rounded-[50px] flex items-center gap-1 dark:text-white border dark:border-none text-black cursor-pointer dark:[text-shadow:0_1px_0_rgb(0_0_0/20%)] dark:bg-stone-800 bg-white  p-[10px] transition-all shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]  ",
+								"flex h-8 items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 text-sm text-stone-600 shadow-xs transition-all dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:shadow-none",
 								{
-									"shadow-[inset_0_1px_0_rgba(0,0,0,0.2)] dark:bg-stone-700 bg-stone-200":
-										settingsOpen,
+									"shadow-inner": settingsOpen,
 								},
 								{
-									"dark:bg-stone-800/70 bg-stone-100/70 ":
+									"dark:border-stone-600/80 dark:bg-stone-800/80 bg-white/75":
 										customBackgroundImage,
+								},
+								{
+									"border-blue-400/90 text-blue-600 dark:border-blue-400/70 dark:text-blue-400":
+										sortType !== "default",
 								},
 							)}
 						>
-							<p className="text-[10px] font-bold whitespace-nowrap">
-								{sortType === "default" ? "Sort" : sortType.toUpperCase()}
-							</p>
 							{sortOrder === "asc" && sortType !== "default" ? (
-								<ArrowUpIcon className="size-[13px]" />
+								<ArrowUpIcon className="size-3.5 shrink-0" />
 							) : sortOrder === "desc" && sortType !== "default" ? (
-								<ArrowDownIcon className="size-[13px]" />
+								<ArrowDownIcon className="size-3.5 shrink-0" />
 							) : (
-								<ArrowsUpDownIcon className="size-[13px]" />
+								<ArrowsUpDownIcon className="size-3.5 shrink-0" />
 							)}
+							<span className="font-medium text-stone-900 dark:text-stone-100">
+								Sort
+							</span>
+							<span className="text-stone-300 dark:text-stone-600">|</span>
+							<span className="font-medium whitespace-nowrap">
+								{sortType === "default" ? "System" : currentSortTypeLabel}
+							</span>
 						</button>
 					</PopoverTrigger>
-					<PopoverContent className="p-4 w-[240px] rounded-lg">
-						<div className="space-y-4">
+					<PopoverContent
+						align="end"
+						className="w-72 overflow-hidden rounded-2xl p-0 shadow-xl"
+					>
+						<div className="border-b border-stone-200 bg-linear-to-br from-blue-50 to-white p-3 dark:border-stone-700 dark:from-stone-800 dark:to-stone-900">
+							<div className="flex items-start justify-between gap-3">
+								<div>
+									<p className="text-xs font-semibold text-stone-800 dark:text-stone-100">
+										Sort Servers
+									</p>
+									<p className="text-[10px] text-stone-500 dark:text-stone-400">
+										Choose metric and direction
+									</p>
+								</div>
+								<button
+									onClick={() => {
+										setSortType("default");
+										setSortOrder("desc");
+									}}
+									className="rounded-full border border-stone-300 px-2 py-1 text-[10px] font-medium text-stone-600 transition-colors hover:bg-stone-100 dark:border-stone-600 dark:text-stone-300 dark:hover:bg-stone-700"
+								>
+									Reset
+								</button>
+							</div>
+						</div>
+						<div className="space-y-3 p-3">
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
-									Sort by
-								</Label>
-								<Select value={sortType} onValueChange={setSortType}>
-									<SelectTrigger className="w-full text-xs h-8">
-										<SelectValue placeholder="Choose type" />
-									</SelectTrigger>
-									<SelectContent>
-										{SORT_TYPES.map((type) => (
-											<SelectItem key={type} value={type} className="text-xs">
-												{type.charAt(0).toUpperCase() + type.slice(1)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+								<p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+									Metric
+								</p>
+								<div className="flex flex-wrap gap-1.5">
+									{SORT_TYPES.map((type) => {
+										const isActive = sortType === type;
+										const label =
+											type === "default"
+												? "Default"
+												: type.charAt(0).toUpperCase() + type.slice(1);
+
+										return (
+											<button
+												key={type}
+												onClick={() => {
+													setSortType(type);
+													if (type === "default") {
+														setSortOrder("desc");
+													}
+												}}
+												className={cn(
+													"inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium transition-all",
+													isActive
+														? "border-blue-500 bg-blue-500 text-white shadow-sm"
+														: "border-stone-200 bg-stone-50 text-stone-600 hover:border-stone-300 hover:bg-stone-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700",
+												)}
+											>
+												{isActive && <CheckIcon className="size-3" />}
+												{label}
+											</button>
+										);
+									})}
+								</div>
 							</div>
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
-									Sort order
-								</Label>
-								<Select
-									value={sortOrder}
-									onValueChange={setSortOrder}
-									disabled={sortType === "default"}
-								>
-									<SelectTrigger className="w-full text-xs h-8">
-										<SelectValue placeholder="Choose order" />
-									</SelectTrigger>
-									<SelectContent>
-										{SORT_ORDERS.map((order) => (
-											<SelectItem key={order} value={order} className="text-xs">
-												{order.charAt(0).toUpperCase() + order.slice(1)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+								<p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+									Direction
+								</p>
+								<div className="grid grid-cols-2 gap-1.5 rounded-full bg-stone-100 p-1 dark:bg-stone-800">
+									{SORT_ORDERS.map((order) => (
+										<button
+											key={order}
+											onClick={() => setSortOrder(order)}
+											disabled={sortType === "default"}
+											className={cn(
+												"flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold transition-all",
+												sortOrder === order && sortType !== "default"
+													? "bg-white text-blue-600 shadow-sm dark:bg-stone-900 dark:text-blue-300"
+													: "text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-100",
+												"disabled:cursor-not-allowed disabled:opacity-40",
+											)}
+										>
+											{order === "asc" ? (
+												<ArrowUpIcon className="size-3" />
+											) : (
+												<ArrowDownIcon className="size-3" />
+											)}
+											{order === "asc" ? "Ascending" : "Descending"}
+										</button>
+									))}
+								</div>
 							</div>
 						</div>
 					</PopoverContent>

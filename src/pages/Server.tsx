@@ -397,7 +397,7 @@ export default function Servers() {
 						</div>
 
 						<span className="font-medium text-stone-900 dark:text-stone-100">
-							Sort
+							{t("sort.label")}
 						</span>
 					</button>
 					<span className="text-stone-300 dark:text-stone-600 mb-0.5">|</span>

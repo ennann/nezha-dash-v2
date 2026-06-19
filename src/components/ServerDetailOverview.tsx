@@ -1,3 +1,4 @@
+import NumericText from "@numeric-text/react";
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 import { useEffect, useState } from "react";
@@ -11,8 +12,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { formatBytes } from "@/lib/format";
 import { cn, formatNezhaInfo } from "@/lib/utils";
-import type { NezhaWebsocketResponse } from "@/types/nezha-api";
-
 import {
 	Accordion,
 	AccordionContent,
@@ -43,9 +42,9 @@ export default function ServerDetailOverview({
 		}
 	}, []);
 
-	const { lastMessage, connected } = useWebSocketContext();
+	const { lastData, connected } = useWebSocketContext();
 
-	if (!connected && !lastMessage) {
+	if (!connected && !lastData) {
 		return <ServerDetailLoading />;
 	}
 
@@ -57,9 +56,7 @@ export default function ServerDetailOverview({
 		}
 	};
 
-	const nezhaWsData = lastMessage
-		? (JSON.parse(lastMessage.data) as NezhaWebsocketResponse)
-		: null;
+	const nezhaWsData = lastData;
 
 	if (!nezhaWsData) {
 		return <ServerDetailLoading />;
@@ -141,12 +138,14 @@ export default function ServerDetailOverview({
 								<p className="text-xs text-muted-foreground">
 									{t("serverDetail.uptime")}
 								</p>
-								<div className="text-xs">
-									{" "}
-									{uptime / 86400 >= 1
-										? `${Math.floor(uptime / 86400)} ${t("serverDetail.days")} ${Math.floor((uptime % 86400) / 3600)} ${t("serverDetail.hours")}`
-										: `${Math.floor(uptime / 3600)} ${t("serverDetail.hours")}`}
-								</div>
+								<NumericText
+									value={
+										uptime / 86400 >= 1
+											? `${Math.floor(uptime / 86400)} ${t("serverDetail.days")} ${Math.floor((uptime % 86400) / 3600)} ${t("serverDetail.hours")}`
+											: `${Math.floor(uptime / 3600)} ${t("serverDetail.hours")}`
+									}
+									className="text-xs"
+								/>
 							</section>
 						</CardContent>
 					</Card>
@@ -276,8 +275,19 @@ export default function ServerDetailOverview({
 					<CardContent className="px-1.5 py-1">
 						<section className="flex flex-col items-start gap-0.5">
 							<p className="text-xs text-muted-foreground">{"Load"}</p>
-							<div className="text-xs">
-								{load_1} / {load_5} / {load_15}
+							<div className="grid grid-cols-3 gap-2 text-xs tabular-nums">
+								{[
+									{ label: "1m", value: load_1 },
+									{ label: "5m", value: load_5 },
+									{ label: "15m", value: load_15 },
+								].map(({ label, value }) => (
+									<div key={label} className="flex items-center gap-1">
+										<span className="text-[10px] text-muted-foreground">
+											{label}
+										</span>
+										<NumericText value={`${value}`} className="text-xs" />
+									</div>
+								))}
 							</div>
 						</section>
 					</CardContent>
@@ -290,10 +300,10 @@ export default function ServerDetailOverview({
 									{t("serverDetail.upload")}
 								</p>
 								{net_out_transfer ? (
-									<div className="text-xs">
-										{" "}
-										{formatBytes(net_out_transfer)}{" "}
-									</div>
+									<NumericText
+										value={formatBytes(net_out_transfer)}
+										className="text-xs"
+									/>
 								) : (
 									<div className="text-xs"> {t("serverDetail.unknown")}</div>
 								)}
@@ -309,10 +319,10 @@ export default function ServerDetailOverview({
 									{t("serverDetail.download")}
 								</p>
 								{net_in_transfer ? (
-									<div className="text-xs">
-										{" "}
-										{formatBytes(net_in_transfer)}{" "}
-									</div>
+									<NumericText
+										value={formatBytes(net_in_transfer)}
+										className="text-xs"
+									/>
 								) : (
 									<div className="text-xs"> {t("serverDetail.unknown")}</div>
 								)}
@@ -365,9 +375,12 @@ export default function ServerDetailOverview({
 							<p className="text-xs text-muted-foreground">
 								{t("serverDetail.lastActive")}
 							</p>
-							<div className="text-xs">
-								{last_active_time_string ? last_active_time_string : "N/A"}
-							</div>
+							<NumericText
+								value={
+									last_active_time_string ? last_active_time_string : "N/A"
+								}
+								className="text-xs"
+							/>
 						</section>
 					</CardContent>
 				</Card>

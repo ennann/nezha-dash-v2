@@ -1,8 +1,7 @@
-import NumericText from "@numeric-text/react";
 import { useQuery } from "@tanstack/react-query";
-import { ImageMinus } from "lucide-react";
+import { ImageMinus, LogIn } from "lucide-react";
 import { DateTime } from "luxon";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ModeToggle } from "@/components/ThemeSwitcher";
@@ -10,13 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBackground } from "@/hooks/use-background";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
-import { fetchLoginUser, fetchSetting } from "@/lib/nezha-api";
+import { fetchSetting } from "@/lib/nezha-api";
 import { cn } from "@/lib/utils";
 
 import AnimateCountClient from "./AnimatedCount";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { Loader, LoadingSpinner } from "./loading/Loader";
-import { SearchButton } from "./SearchButton";
+import { LoadingSpinner } from "./loading/Loader";
 import { Button } from "./ui/button";
 
 interface TimeState {
@@ -49,7 +47,6 @@ const useCurrentTime = () => {
 };
 
 function Header() {
-	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { backgroundImage, updateBackground } = useBackground();
 
@@ -60,17 +57,14 @@ function Header() {
 		refetchOnWindowFocus: true,
 	});
 
-	const { lastData, connected } = useWebSocketContext();
-
-	const onlineCount = connected ? (lastData ? lastData.online || 0 : 0) : "...";
-
 	const siteName = settingData?.data?.config?.site_name;
 
 	// @ts-expect-error CustomLogo is a global variable
-	const customLogo = window.CustomLogo || "/apple-touch-icon.png";
+	const customLogo = window.CustomLogo || "/favicon.ico";
 
 	// @ts-expect-error CustomDesc is a global variable
-	const customDesc = window.CustomDesc || t("nezha");
+	const customDesc = window.CustomDesc || " ";
+	const hasCustomDesc = customDesc.trim().length > 0;
 
 	const customMobileBackgroundImage =
 		window.CustomMobileBackgroundImage !== ""
@@ -114,7 +108,7 @@ function Header() {
 	const customBackgroundImage = backgroundImage;
 
 	return (
-		<div className="mx-auto w-full max-w-5xl">
+		<div className="mx-auto w-full max-w-screen-xl">
 			<section className="flex items-center justify-between header-top">
 				<section
 					onClick={() => {
@@ -137,20 +131,23 @@ function Header() {
 					) : (
 						siteName || "NEZHA"
 					)}
-					<Separator
-						orientation="vertical"
-						className="mx-2 hidden h-4 w-px md:block"
-					/>
-					<p className="hidden text-sm font-medium opacity-40 md:block">
-						{customDesc}
-					</p>
+					{hasCustomDesc ? (
+						<>
+							<Separator
+								orientation="vertical"
+								className="mx-2 hidden h-4 w-px md:block"
+							/>
+							<p className="hidden text-sm font-medium opacity-40 md:block">
+								{customDesc}
+							</p>
+						</>
+					) : null}
 				</section>
 				<section className="flex items-center gap-2 header-handles">
 					<div className="hidden sm:flex items-center gap-2">
 						<Links />
-						<DashboardLink />
 					</div>
-					<SearchButton />
+					<DashboardButton />
 					<LanguageSwitcher />
 					<ModeToggle />
 					{(customBackgroundImage ||
@@ -167,34 +164,9 @@ function Header() {
 							<ImageMinus className="w-4 h-4" />
 						</Button>
 					)}
-					<Button
-						variant="outline"
-						size="sm"
-						className={cn(
-							"hover:bg-white dark:hover:bg-black cursor-default rounded-full flex items-center px-[9px] bg-white dark:bg-black",
-							{
-								"bg-white/70 dark:bg-black/70": customBackgroundImage,
-							},
-						)}
-					>
-						{connected ? (
-							<NumericText value={onlineCount} />
-						) : (
-							<Loader visible={true} />
-						)}
-						<p className="text-muted-foreground">
-							{connected ? t("online") : t("offline")}
-						</p>
-						<span
-							className={cn("h-2 w-2 rounded-full bg-green-500", {
-								"bg-red-500": !connected,
-							})}
-						></span>
-					</Button>
 				</section>
 			</section>
 			<div className="w-full flex justify-between sm:hidden mt-1">
-				<DashboardLink />
 				<Links />
 			</div>
 			<Overview />
@@ -261,64 +233,27 @@ export function RefreshToast() {
 	);
 }
 
-function DashboardLink() {
+function DashboardButton() {
 	const { t } = useTranslation();
-	const { setNeedReconnect } = useWebSocketContext();
-	const previousLoginState = useRef<boolean | null>(null);
-	const {
-		data: userData,
-		isFetched,
-		isLoadingError,
-		isError,
-		refetch,
-	} = useQuery({
-		queryKey: ["login-user"],
-		queryFn: () => fetchLoginUser(),
-		refetchOnMount: false,
-		refetchOnWindowFocus: true,
-		refetchIntervalInBackground: true,
-		refetchInterval: 1000 * 30,
-		retry: 0,
-	});
-
-	const isLogin = isError
-		? false
-		: userData
-			? !!userData?.data?.id && !!document.cookie
-			: false;
-
-	if (isLoadingError) {
-		previousLoginState.current = isLogin;
-	}
-
-	useEffect(() => {
-		refetch();
-	}, [refetch]);
-
-	useEffect(() => {
-		if (isFetched || isError) {
-			// 只有当登录状态发生变化时才设置needReconnect
-			if (
-				previousLoginState.current !== null &&
-				previousLoginState.current !== isLogin
-			) {
-				setNeedReconnect(true);
-			}
-			previousLoginState.current = isLogin;
-		}
-	}, [isLogin, isError, isFetched, setNeedReconnect]);
+	const customBackgroundImage =
+		(window.CustomBackgroundImage as string) !== ""
+			? window.CustomBackgroundImage
+			: undefined;
 
 	return (
-		<div className="flex items-center gap-2">
-			<a
-				href={"/dashboard"}
-				rel="noopener noreferrer"
-				className="flex items-center text-nowrap gap-1 text-sm font-medium opacity-50 transition-opacity hover:opacity-100"
-			>
-				{!isLogin && t("login")}
-				{isLogin && t("dashboard")}
+		<Button
+			variant="outline"
+			size="sm"
+			asChild
+			className={cn("rounded-full px-[9px] bg-white dark:bg-black", {
+				"bg-white/70 dark:bg-black/70": customBackgroundImage,
+			})}
+		>
+			<a href="/dashboard/" rel="noopener noreferrer" title={t("login")}>
+				<LogIn className="size-4" />
+				<span className="sr-only">{t("login")}</span>
 			</a>
-		</div>
+		</Button>
 	);
 }
 

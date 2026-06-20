@@ -1,7 +1,13 @@
 {
-	"name": "Nezha Monitoring",
-	"short_name": "Nezha Monitoring",
+	"name": "HumanZoo",
+	"short_name": "HumanZoo",
 	"icons": [
+		{
+			"src": "/apple-touch-icon.png",
+			"sizes": "256x256",
+			"type": "image/png",
+			"purpose": "any maskable"
+		},
 		{
 			"src": "/android-chrome-192x192.png",
 			"sizes": "192x192",

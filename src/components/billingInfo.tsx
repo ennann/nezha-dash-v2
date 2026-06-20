@@ -1,106 +1,81 @@
-import { useTranslation } from "react-i18next";
-import {
-	cn,
-	getDaysBetweenDatesWithAutoRenewal,
-	type PublicNoteData,
-} from "@/lib/utils";
+import { cn, getBillingDisplay, type PublicNoteData } from "@/lib/utils";
 
 import RemainPercentBar from "./RemainPercentBar";
 
 export default function BillingInfo({
 	parsedData,
+	layout = "stacked",
+	showInlineLabels = false,
+	className,
+	barClassName,
 }: {
-	parsedData: PublicNoteData;
+	parsedData?: PublicNoteData | null;
+	layout?: "stacked" | "inline";
+	showInlineLabels?: boolean;
+	className?: string;
+	barClassName?: string;
 }) {
-	const { t } = useTranslation();
-	if (!parsedData?.billingDataMod) {
-		return null;
-	}
+	const billing = getBillingDisplay(parsedData);
 
-	let isNeverExpire = false;
-	let daysLeftObject = {
-		days: 0,
-		cycleLabel: "",
-		remainingPercentage: 0,
-	};
-	const hasBillingDates =
-		Boolean(parsedData.billingDataMod.startDate) ||
-		Boolean(parsedData.billingDataMod.endDate);
-
-	if (parsedData?.billingDataMod?.endDate) {
-		if (parsedData.billingDataMod.endDate.startsWith("0000-00-00")) {
-			isNeverExpire = true;
-		} else {
-			try {
-				daysLeftObject = getDaysBetweenDatesWithAutoRenewal(
-					parsedData.billingDataMod,
-				);
-			} catch (error) {
-				console.error(error);
-				return (
-					<div className={cn("text-[10px] text-muted-foreground text-red-600")}>
-						{t("billingInfo.remaining")}: {t("billingInfo.error")}
-					</div>
-				);
-			}
-		}
-	}
-
-	return daysLeftObject.days >= 0 ? (
-		<>
-			{parsedData.billingDataMod.amount &&
-			parsedData.billingDataMod.amount !== "0" &&
-			parsedData.billingDataMod.amount !== "-1" ? (
-				<p className={cn("text-[10px] text-muted-foreground ")}>
-					{t("billingInfo.price")}: {parsedData.billingDataMod.amount}/
-					{parsedData.billingDataMod.cycle}
-				</p>
-			) : parsedData.billingDataMod.amount === "0" ? (
-				<p className={cn("text-[10px] text-green-600 ")}>
-					{t("billingInfo.free")}
-				</p>
-			) : parsedData.billingDataMod.amount === "-1" ? (
-				<p className={cn("text-[10px] text-pink-600 ")}>
-					{t("billingInfo.usage-baseed")}
-				</p>
-			) : null}
-			{hasBillingDates && (
-				<div className={cn("text-[10px] text-muted-foreground")}>
-					{t("billingInfo.remaining")}:{" "}
-					{isNeverExpire
-						? t("billingInfo.indefinite")
-						: `${daysLeftObject.days} ${t("billingInfo.days")}`}
-				</div>
-			)}
-			{hasBillingDates && !isNeverExpire && (
+	if (layout === "inline") {
+		return (
+			<div
+				className={cn(
+					"flex min-w-0 items-center gap-1.5 text-[10px] font-medium text-muted-foreground",
+					className,
+				)}
+			>
+				<span className="shrink-0">
+					{showInlineLabels ? "价格: " : ""}
+					{billing.price}
+				</span>
+				<span
+					className={cn("shrink-0", {
+						"text-red-500": billing.expired,
+					})}
+				>
+					{showInlineLabels
+						? billing.expired
+							? "已过期: "
+							: "剩余天数: "
+						: ""}
+					<RemainingText value={billing.remaining} />
+				</span>
 				<RemainPercentBar
-					className="mt-0.5"
-					value={daysLeftObject.remainingPercentage * 100}
+					value={billing.progress}
+					className={cn("w-[70px] shrink-0", barClassName)}
 				/>
-			)}
-		</>
-	) : (
-		<>
-			{parsedData.billingDataMod.amount &&
-			parsedData.billingDataMod.amount !== "0" &&
-			parsedData.billingDataMod.amount !== "-1" ? (
-				<p className={cn("text-[10px] text-muted-foreground ")}>
-					{t("billingInfo.price")}: {parsedData.billingDataMod.amount}/
-					{parsedData.billingDataMod.cycle}
-				</p>
-			) : parsedData.billingDataMod.amount === "0" ? (
-				<p className={cn("text-[10px] text-green-600 ")}>
-					{t("billingInfo.free")}
-				</p>
-			) : parsedData.billingDataMod.amount === "-1" ? (
-				<p className={cn("text-[10px] text-pink-600 ")}>
-					{t("billingInfo.usage-baseed")}
-				</p>
-			) : null}
-			<p className={cn("text-[10px] text-muted-foreground text-red-600")}>
-				{t("billingInfo.expired")}: {daysLeftObject.days * -1}{" "}
-				{t("billingInfo.days")}
+			</div>
+		);
+	}
+
+	return (
+		<div className={cn("flex w-full flex-col", className)}>
+			<p className="truncate text-xs leading-4 text-muted-foreground">
+				{billing.price}
 			</p>
-		</>
+			<div
+				className={cn("flex h-4 items-center text-xs font-semibold leading-4", {
+					"text-red-500": billing.expired,
+				})}
+			>
+				<RemainingText value={billing.remaining} />
+			</div>
+			<RemainPercentBar
+				value={billing.progress}
+				className={cn("mt-0.5 w-full", barClassName)}
+			/>
+		</div>
+	);
+}
+
+function RemainingText({ value }: { value: string }) {
+	if (value !== "+∞") return value;
+
+	return (
+		<span className="inline-flex h-4 items-center leading-none">
+			<span className="leading-none">+</span>
+			<span className="pl-[1px] text-[13px] leading-none">∞</span>
+		</span>
 	);
 }

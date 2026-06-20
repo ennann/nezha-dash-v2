@@ -52,6 +52,152 @@ export function formatNezhaInfo(now: number, serverInfo: NezhaServer) {
 	};
 }
 
+function trimAmount(value: string) {
+	const parsed = Number.parseFloat(value);
+	if (!Number.isFinite(parsed)) return value.trim();
+	return parsed.toFixed(2).replace(/\.?0+$/, "");
+}
+
+function formatAmount(raw?: string) {
+	const amount = (raw || "").trim();
+	if (!amount || amount === "0" || amount === "0.00") return "免费";
+
+	if (/usd$/i.test(amount)) {
+		return `$${trimAmount(amount.replace(/usd$/i, ""))}`;
+	}
+
+	if (/cny$/i.test(amount)) {
+		return `¥${trimAmount(amount.replace(/cny$/i, ""))}`;
+	}
+
+	if (amount.startsWith("$")) return `$${trimAmount(amount.slice(1))}`;
+	if (amount.startsWith("¥")) return `¥${trimAmount(amount.slice(1))}`;
+	return amount;
+}
+
+function formatCycle(cycle?: string) {
+	switch ((cycle || "").toLowerCase()) {
+		case "year":
+		case "annual":
+		case "yr":
+		case "y":
+		case "年":
+			return "年";
+		case "month":
+		case "monthly":
+		case "mo":
+		case "m":
+		case "月":
+			return "月";
+		default:
+			return cycle || "";
+	}
+}
+
+export type BillingDisplay = {
+	price: string;
+	remaining: string;
+	progress: number;
+	free: boolean;
+	expired: boolean;
+};
+
+export function getBillingDisplay(
+	parsedData?: PublicNoteData | null,
+): BillingDisplay {
+	const billing = parsedData?.billingDataMod;
+
+	if (!billing) {
+		return {
+			price: "免费",
+			remaining: "+∞",
+			progress: 100,
+			free: true,
+			expired: false,
+		};
+	}
+
+	const amount = formatAmount(billing.amount);
+	const free = amount === "免费";
+	const cycle = formatCycle(billing.cycle);
+	const price = cycle && !free ? `${amount}/${cycle}` : amount;
+
+	if (!billing.endDate || billing.endDate.startsWith("0000-00-00")) {
+		return {
+			price,
+			remaining: free ? "+∞" : "--",
+			progress: free ? 100 : 0,
+			free,
+			expired: false,
+		};
+	}
+
+	try {
+		const daysLeft = getDaysBetweenDatesWithAutoRenewal(billing);
+		const expired = daysLeft.days < 0;
+		return {
+			price,
+			remaining: expired ? `${daysLeft.days * -1} 天` : `${daysLeft.days} 天`,
+			progress: expired
+				? 0
+				: Math.max(0, Math.min(100, daysLeft.remainingPercentage * 100)),
+			free,
+			expired,
+		};
+	} catch (error) {
+		console.error(error);
+		return {
+			price,
+			remaining: "--",
+			progress: 0,
+			free,
+			expired: false,
+		};
+	}
+}
+
+export function getPlanTags(parsedData?: PublicNoteData | null) {
+	const plan = parsedData?.planDataMod;
+	if (!plan) return [];
+
+	const networkRoutes = plan.networkRoute
+		? plan.networkRoute.split(",").filter(Boolean)
+		: [];
+	const extraList = plan.extra ? plan.extra.split(",").filter(Boolean) : [];
+
+	return [
+		plan.bandwidth,
+		plan.trafficVol,
+		plan.IPv4 === "1" ? "IPv4" : undefined,
+		plan.IPv6 === "1" ? "IPv6" : undefined,
+		networkRoutes.length > 0 ? networkRoutes.join("｜") : undefined,
+		...extraList,
+	].filter((tag): tag is string => Boolean(tag?.trim()));
+}
+
+export function planTagClassName(index: number) {
+	const classes = [
+		"border-sky-200/70 bg-sky-50 text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300",
+		"border-emerald-200/70 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300",
+		"border-violet-200/70 bg-violet-50 text-violet-700 dark:border-violet-900/60 dark:bg-violet-950/40 dark:text-violet-300",
+		"border-rose-200/70 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300",
+		"border-stone-200/70 bg-stone-50 text-stone-700 dark:border-stone-800 dark:bg-stone-900/60 dark:text-stone-300",
+	];
+
+	return classes[index % classes.length];
+}
+
+export function formatSpeedCompact(bytesPerSecond: number) {
+	if (!Number.isFinite(bytesPerSecond) || bytesPerSecond <= 0) return "0K/s";
+	if (bytesPerSecond < 1024 * 1024) {
+		return `${(bytesPerSecond / 1024).toFixed(2)}K/s`;
+	}
+	if (bytesPerSecond < 1024 * 1024 * 1024) {
+		return `${(bytesPerSecond / 1024 / 1024).toFixed(2)}M/s`;
+	}
+	return `${(bytesPerSecond / 1024 / 1024 / 1024).toFixed(2)}G/s`;
+}
+
 export function getDaysBetweenDatesWithAutoRenewal({
 	autoRenewal,
 	cycle,

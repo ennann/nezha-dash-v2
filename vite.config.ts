@@ -30,6 +30,8 @@ const getVendorChunkName = (moduleId: string) => {
 	return packageName || null;
 };
 
+const useLocalHttp = process.env.LOCAL_HTTP === "1";
+
 // https://vite.dev/config/
 export default defineConfig({
 	base: "/",
@@ -43,15 +45,20 @@ export default defineConfig({
 		},
 	},
 	server: {
-		https: {
-			key: fs.readFileSync("./.cert/key.pem"),
-			cert: fs.readFileSync("./.cert/cert.pem"),
-		},
+		https: useLocalHttp
+			? undefined
+			: {
+					key: fs.readFileSync("./.cert/key.pem"),
+					cert: fs.readFileSync("./.cert/cert.pem"),
+				},
 		proxy: {
 			"/api/v1/ws/server": {
 				target: "ws://localhost:8008",
 				changeOrigin: true,
 				ws: true,
+				headers: {
+					Origin: "http://localhost:8008",
+				},
 			},
 			"/api/v1/": {
 				target: "http://localhost:8008",

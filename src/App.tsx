@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
@@ -11,7 +11,6 @@ import Header, { RefreshToast } from "./components/Header";
 import { Skeleton } from "./components/ui/skeleton";
 import { useBackground } from "./hooks/use-background";
 import { useTheme } from "./hooks/use-theme";
-import { InjectContext } from "./lib/inject";
 import { fetchSetting } from "./lib/nezha-api";
 import { cn } from "./lib/utils";
 import ErrorPage from "./pages/ErrorPage";
@@ -22,7 +21,7 @@ const ServerDetail = lazy(() => import("./pages/ServerDetail"));
 
 function ServerDetailRouteFallback() {
 	return (
-		<div className="mx-auto w-full max-w-5xl px-0 flex flex-col gap-4">
+		<div className="mx-auto w-full max-w-screen-xl px-0 flex flex-col gap-4">
 			<div>
 				<div className="flex flex-none items-center gap-0.5 text-xl">
 					<Skeleton className="h-5 w-5 rounded-[5px] bg-muted-foreground/10 animate-none" />
@@ -56,15 +55,7 @@ const MainApp: React.FC = () => {
 	});
 	const { i18n } = useTranslation();
 	const { setTheme } = useTheme();
-	const [isCustomCodeInjected, setIsCustomCodeInjected] = useState(false);
 	const { backgroundImage: customBackgroundImage } = useBackground();
-
-	useEffect(() => {
-		if (settingData?.data?.config?.custom_code) {
-			InjectContext(settingData?.data?.config?.custom_code);
-			setIsCustomCodeInjected(true);
-		}
-	}, [settingData?.data?.config?.custom_code]);
 
 	// 检测是否强制指定了主题颜色
 	const forceTheme =
@@ -82,10 +73,6 @@ const MainApp: React.FC = () => {
 	}
 
 	if (!settingData) {
-		return null;
-	}
-
-	if (settingData?.data?.config?.custom_code && !isCustomCodeInjected) {
 		return null;
 	}
 

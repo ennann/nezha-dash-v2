@@ -102,9 +102,7 @@ export default function ServerCard({
 							"lg:hidden": fixedTopServerName,
 						})}
 					>
-						{parsedData?.billingDataMod && (
-							<BillingInfo parsedData={parsedData} />
-						)}
+						<BillingInfo parsedData={parsedData} />
 					</div>
 				</div>
 			</section>
@@ -113,7 +111,12 @@ export default function ServerCard({
 					"lg:flex": fixedTopServerName,
 				})}
 			>
-				{parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} />}
+				<BillingInfo
+					parsedData={parsedData}
+					layout="inline"
+					showInlineLabels
+					className="justify-center"
+				/>
 			</div>
 			<div className="flex flex-col lg:items-start items-center gap-2">
 				<section
@@ -212,7 +215,7 @@ export default function ServerCard({
 						</Badge>
 					</section>
 				)}
-				{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} />}
+				<PlanInfo parsedData={parsedData} />
 			</div>
 		</Card>
 	) : (
@@ -261,9 +264,7 @@ export default function ServerCard({
 							"lg:hidden": fixedTopServerName,
 						})}
 					>
-						{parsedData?.billingDataMod && (
-							<BillingInfo parsedData={parsedData} />
-						)}
+						<BillingInfo parsedData={parsedData} />
 					</div>
 				</div>
 			</section>
@@ -272,9 +273,14 @@ export default function ServerCard({
 					"lg:flex": fixedTopServerName,
 				})}
 			>
-				{parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} />}
+				<BillingInfo
+					parsedData={parsedData}
+					layout="inline"
+					showInlineLabels
+					className="justify-center"
+				/>
 			</div>
-			{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} />}
+			<PlanInfo parsedData={parsedData} />
 		</Card>
 	);
 }

@@ -95,7 +95,11 @@ export default function Servers() {
 					setInline("1");
 				} else if (inlineState !== null) {
 					setInline(inlineState);
+				} else {
+					setInline("1");
 				}
+			} else {
+				setInline("0");
 			}
 		};
 
@@ -289,7 +293,7 @@ export default function Servers() {
 	});
 
 	return (
-		<div className="mx-auto w-full max-w-5xl px-0">
+		<div className="mx-auto w-full max-w-screen-xl px-0">
 			<ServerOverview
 				total={totalServers}
 				online={onlineServers}

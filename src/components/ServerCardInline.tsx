@@ -11,9 +11,11 @@ import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
 
 export default function ServerCardInline({
+	firstColumnWidth = 160,
 	now,
 	serverInfo,
 }: {
+	firstColumnWidth?: number;
 	now: number;
 	serverInfo: NezhaServer;
 }) {
@@ -61,7 +63,10 @@ export default function ServerCardInline({
 				)}
 				onClick={cardClick}
 			>
-				<section className="flex w-[190px] shrink-0 flex-col gap-1.5 overflow-hidden">
+				<section
+					className="flex shrink-0 flex-col gap-1.5 overflow-hidden"
+					style={{ width: firstColumnWidth }}
+				>
 					<div
 						className="grid items-center gap-2"
 						style={{ gridTemplateColumns: "auto auto 1fr" }}
@@ -86,7 +91,7 @@ export default function ServerCardInline({
 					</div>
 					<PlanInfo parsedData={parsedData} nowrap />
 				</section>
-				<Separator orientation="vertical" className="h-8 mx-0" />
+				<Separator orientation="vertical" className="h-8 mx-2" />
 				<div className="flex flex-1 flex-col gap-1">
 					<section className="grid flex-1 grid-cols-[80px_80px_56px_56px_56px_64px_64px_80px_80px] items-center justify-between gap-3">
 						<div className="flex w-20 flex-col">

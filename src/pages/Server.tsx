@@ -21,8 +21,31 @@ import { useSort } from "@/hooks/use-sort";
 import { useStatus } from "@/hooks/use-status";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { fetchServerGroup, fetchService } from "@/lib/nezha-api";
-import { cn, formatNezhaInfo } from "@/lib/utils";
+import { cn, formatNezhaInfo, getPlanTags, parsePublicNote } from "@/lib/utils";
 import type { ServerGroup } from "@/types/nezha-api";
+
+const INLINE_NAME_COLUMN_MIN = 132;
+const INLINE_NAME_COLUMN_MAX = 190;
+
+function estimateInlineNameColumnWidth(
+	servers: ReturnType<typeof formatNezhaInfo>[],
+) {
+	const widths = servers.map((server) => {
+		const tags = getPlanTags(parsePublicNote(server.public_note));
+		const nameRowWidth = 8 + 17 + 16 + server.name.length * 7.2;
+		const tagRowWidth = tags.reduce((total, tag, index) => {
+			return total + tag.length * 5.4 + 10 + (index > 0 ? 4 : 0);
+		}, 0);
+		return Math.ceil(Math.max(nameRowWidth, tagRowWidth));
+	});
+
+	const maxWidth =
+		widths.length > 0 ? Math.max(...widths) : INLINE_NAME_COLUMN_MIN;
+	return Math.min(
+		INLINE_NAME_COLUMN_MAX,
+		Math.max(INLINE_NAME_COLUMN_MIN, maxWidth),
+	);
+}
 
 export default function Servers() {
 	const { t } = useTranslation();
@@ -299,6 +322,10 @@ export default function Servers() {
 		return sortOrder === "asc" ? comparison : -comparison;
 	});
 
+	const inlineNameColumnWidth = estimateInlineNameColumnWidth(
+		filteredServers.map((server) => formatNezhaInfo(nezhaWsData.now, server)),
+	);
+
 	return (
 		<div className="mx-auto w-full max-w-screen-xl px-0">
 			<ServerOverview
@@ -452,6 +479,7 @@ export default function Servers() {
 				>
 					{filteredServers.map((serverInfo) => (
 						<ServerCardInline
+							firstColumnWidth={inlineNameColumnWidth}
 							now={nezhaWsData.now}
 							key={serverInfo.id}
 							serverInfo={serverInfo}

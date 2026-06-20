@@ -48,6 +48,7 @@ export default function Servers() {
 	const [inline, setInline] = useState<string>("0");
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [currentGroup, setCurrentGroup] = useState<string>("All");
+	const [isMobileView, setIsMobileView] = useState(false);
 
 	const customBackgroundImage =
 		(window.CustomBackgroundImage as string) !== ""
@@ -88,6 +89,7 @@ export default function Servers() {
 	useEffect(() => {
 		const checkInlineSettings = () => {
 			const isMobile = window.innerWidth < 768;
+			setIsMobileView(isMobile);
 
 			if (!isMobile) {
 				const inlineState = localStorage.getItem("inline");
@@ -100,6 +102,8 @@ export default function Servers() {
 				}
 			} else {
 				setInline("0");
+				setCurrentGroup("All");
+				sessionStorage.removeItem("selectedGroup");
 			}
 		};
 
@@ -122,7 +126,10 @@ export default function Servers() {
 	}, []);
 
 	useEffect(() => {
-		const savedGroup = sessionStorage.getItem("selectedGroup") || "All";
+		const savedGroup =
+			window.innerWidth < 768
+				? "All"
+				: sessionStorage.getItem("selectedGroup") || "All";
 		setCurrentGroup(savedGroup);
 
 		restoreScrollPosition();
@@ -364,11 +371,13 @@ export default function Servers() {
 					>
 						<ViewColumnsIcon className="size-[13px]" />
 					</button>
-					<GroupSwitch
-						tabs={groupTabs}
-						currentTab={currentGroup}
-						setCurrentTab={handleTagChange}
-					/>
+					{!isMobileView && (
+						<GroupSwitch
+							tabs={groupTabs}
+							currentTab={currentGroup}
+							setCurrentTab={handleTagChange}
+						/>
+					)}
 				</section>
 				<div
 					className={cn(

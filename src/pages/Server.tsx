@@ -35,7 +35,7 @@ function estimateInlineNameColumnWidth(
 		const nameRowWidth = 8 + 17 + 16 + server.name.length * 7.2;
 		const tagRowWidth = tags.reduce((total, tag, index) => {
 			return total + tag.length * 5.4 + 10 + (index > 0 ? 4 : 0);
-		}, 0);
+		}, 6);
 		return Math.ceil(Math.max(nameRowWidth, tagRowWidth));
 	});
 

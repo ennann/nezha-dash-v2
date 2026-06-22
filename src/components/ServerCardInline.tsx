@@ -93,8 +93,8 @@ export default function ServerCardInline({
 				</section>
 				<Separator orientation="vertical" className="h-8 mx-2" />
 				<div className="flex flex-1 flex-col gap-1">
-					<section className="grid flex-1 grid-cols-[80px_80px_56px_56px_56px_64px_64px_80px_80px] items-center justify-between gap-3">
-						<div className="flex w-20 flex-col">
+					<section className="grid flex-1 grid-cols-[80px_64px_56px_56px_56px_64px_64px_80px_80px] items-center justify-between gap-3">
+						<div className="flex w-16 flex-col">
 							<BillingInfo parsedData={parsedData} />
 						</div>
 						<div className="flex w-20 flex-col">

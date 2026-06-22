@@ -24,7 +24,7 @@ export default function PlanInfo({
 		<section
 			className={cn(
 				"flex gap-1 items-center mt-0.5",
-				nowrap ? "flex-nowrap overflow-hidden" : "flex-wrap",
+				nowrap ? "flex-nowrap pr-px" : "flex-wrap",
 				className,
 			)}
 		>
@@ -32,7 +32,7 @@ export default function PlanInfo({
 				<p
 					key={`${tag}-${index}`}
 					className={cn(
-						"w-fit shrink-0 rounded-[5px] border px-[4px] py-[1.5px] text-[9px] leading-none",
+						"box-border w-fit shrink-0 rounded-[5px] border px-[4px] py-[1.5px] text-[9px] leading-none",
 						planTagClassName(index),
 					)}
 				>

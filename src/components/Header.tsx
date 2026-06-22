@@ -24,7 +24,7 @@ interface TimeState {
 }
 
 const DEFAULT_BRAND_LOGO = "/humanzoo-inline.png";
-const DEFAULT_FAVICON = "/favicon.ico";
+const DEFAULT_FAVICON = "/humanzoo-favicon.ico";
 
 const useCurrentTime = () => {
 	const [time, setTime] = useState<TimeState>({

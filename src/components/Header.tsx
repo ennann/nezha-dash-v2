@@ -60,7 +60,7 @@ function Header() {
 	const siteName = settingData?.data?.config?.site_name;
 
 	// @ts-expect-error CustomLogo is a global variable
-	const customLogo = window.CustomLogo || "/favicon.ico";
+	const customLogo = window.CustomLogo || "/humanzoo-logo.png";
 
 	// @ts-expect-error CustomDesc is a global variable
 	const customDesc = window.CustomDesc || " ";
@@ -76,7 +76,7 @@ function Header() {
 			document.querySelector("link[rel*='icon']") ||
 			document.createElement("link");
 		// @ts-expect-error set link.type
-		link.type = "image/x-icon";
+		link.type = customLogo.endsWith(".ico") ? "image/x-icon" : "image/png";
 		// @ts-expect-error set link.rel
 		link.rel = "shortcut icon";
 		// @ts-expect-error set link.href

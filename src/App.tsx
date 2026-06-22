@@ -21,7 +21,7 @@ const ServerDetail = lazy(() => import("./pages/ServerDetail"));
 
 function ServerDetailRouteFallback() {
 	return (
-		<div className="mx-auto w-full max-w-screen-xl px-0 flex flex-col gap-4 lg:w-[90%]">
+		<div className="mx-auto w-full max-w-5xl px-0 flex flex-col gap-4 lg:px-3">
 			<div>
 				<div className="flex flex-none items-center gap-0.5 text-xl">
 					<Skeleton className="h-5 w-5 rounded-[5px] bg-muted-foreground/10 animate-none" />

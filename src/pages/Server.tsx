@@ -327,7 +327,7 @@ export default function Servers() {
 	);
 
 	return (
-		<div className="mx-auto w-full max-w-screen-xl px-0 lg:w-[90%]">
+		<div className="mx-auto w-full max-w-5xl px-0 lg:px-3">
 			<ServerOverview
 				total={totalServers}
 				online={onlineServers}

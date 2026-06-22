@@ -254,6 +254,16 @@ function DashboardButton() {
 		(window.CustomBackgroundImage as string) !== ""
 			? window.CustomBackgroundImage
 			: undefined;
+	const hostname = window.location.hostname;
+	const globalWindow = window as Window & { HideDashboardButton?: boolean };
+	const hideDashboardButton =
+		globalWindow.HideDashboardButton === true ||
+		hostname === "status.yizhe.me" ||
+		hostname.endsWith(".pages.dev");
+
+	if (hideDashboardButton) {
+		return null;
+	}
 
 	return (
 		<Button

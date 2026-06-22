@@ -14,6 +14,8 @@ const getGitHash = () => {
 	}
 };
 
+const gitHash = getGitHash();
+
 const getVendorChunkName = (moduleId: string) => {
 	const normalizedId = moduleId.replace(/\\/g, "/");
 
@@ -36,7 +38,7 @@ const useLocalHttp = process.env.LOCAL_HTTP === "1";
 export default defineConfig({
 	base: "/",
 	define: {
-		"import.meta.env.VITE_GIT_HASH": JSON.stringify(getGitHash()),
+		"import.meta.env.VITE_GIT_HASH": JSON.stringify(gitHash),
 	},
 	plugins: [react()],
 	resolve: {
@@ -107,7 +109,7 @@ export default defineConfig({
 		rolldownOptions: {
 			output: {
 				entryFileNames: `assets/[name].[hash].js`,
-				chunkFileNames: `assets/[name].[hash].js`,
+				chunkFileNames: `assets/[name].[hash].${gitHash}.js`,
 				assetFileNames: `assets/[name].[hash].[ext]`,
 				codeSplitting: {
 					groups: [

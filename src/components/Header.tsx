@@ -23,6 +23,9 @@ interface TimeState {
 	ss: number;
 }
 
+const DEFAULT_BRAND_LOGO = "/humanzoo-inline.png";
+const DEFAULT_FAVICON = "/favicon.ico";
+
 const useCurrentTime = () => {
 	const [time, setTime] = useState<TimeState>({
 		hh: DateTime.now().setLocale("en-US").hour,
@@ -60,11 +63,12 @@ function Header() {
 	const siteName = settingData?.data?.config?.site_name;
 
 	// @ts-expect-error CustomLogo is a global variable
-	const customLogo = window.CustomLogo || "/humanzoo-logo.png";
+	const brandLogo = window.CustomLogo || DEFAULT_BRAND_LOGO;
+	const usesInlineBrandLogo = brandLogo === DEFAULT_BRAND_LOGO;
 
 	// @ts-expect-error CustomDesc is a global variable
 	const customDesc = window.CustomDesc || " ";
-	const hasCustomDesc = customDesc.trim().length > 0;
+	const hasCustomDesc = !usesInlineBrandLogo && customDesc.trim().length > 0;
 
 	const customMobileBackgroundImage =
 		window.CustomMobileBackgroundImage !== ""
@@ -73,16 +77,16 @@ function Header() {
 
 	useEffect(() => {
 		const link =
-			document.querySelector("link[rel*='icon']") ||
+			document.querySelector("link[rel='shortcut icon']") ||
 			document.createElement("link");
 		// @ts-expect-error set link.type
-		link.type = customLogo.endsWith(".ico") ? "image/x-icon" : "image/png";
+		link.type = "image/x-icon";
 		// @ts-expect-error set link.rel
 		link.rel = "shortcut icon";
 		// @ts-expect-error set link.href
-		link.href = customLogo;
+		link.href = DEFAULT_FAVICON;
 		document.getElementsByTagName("head")[0].appendChild(link);
-	}, [customLogo]);
+	}, []);
 
 	useEffect(() => {
 		document.title = siteName || "哪吒监控 Nezha Monitoring";
@@ -115,18 +119,29 @@ function Header() {
 						sessionStorage.removeItem("selectedGroup");
 						navigate("/");
 					}}
-					className="cursor-pointer flex items-center sm:text-base text-sm font-medium"
+					className="cursor-pointer flex min-w-0 items-center sm:text-base text-sm font-medium"
+					aria-label={siteName || "HumanZoo"}
 				>
-					<div className="mr-1 flex flex-row items-center justify-start header-logo">
+					<div
+						className={cn(
+							"flex flex-row items-center justify-start header-logo",
+							usesInlineBrandLogo ? "mr-0" : "mr-1",
+						)}
+					>
 						<img
-							width={40}
-							height={40}
-							alt="apple-touch-icon"
-							src={customLogo}
-							className="relative m-0! border-2 border-transparent h-6 w-6 object-cover object-top p-0!"
+							width={usesInlineBrandLogo ? 122 : 40}
+							height={24}
+							alt={usesInlineBrandLogo ? siteName || "HumanZoo" : "site-logo"}
+							src={brandLogo}
+							className={cn(
+								"relative m-0! border-2 border-transparent h-6 object-top p-0!",
+								usesInlineBrandLogo
+									? "w-auto max-w-[42vw] object-contain object-left"
+									: "w-6 object-cover",
+							)}
 						/>
 					</div>
-					{isLoading ? (
+					{usesInlineBrandLogo ? null : isLoading ? (
 						<Skeleton className="h-6 w-20 rounded-[5px] bg-muted-foreground/10 animate-none" />
 					) : (
 						siteName || "NEZHA"

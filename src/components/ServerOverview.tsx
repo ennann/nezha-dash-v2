@@ -54,7 +54,7 @@ export default function ServerOverview({
 					},
 				)}
 			>
-				<CardContent className="flex h-full items-center px-6 py-3">
+				<CardContent className="flex h-full min-h-[92px] items-center px-6 py-4">
 					<section className="flex flex-col gap-1">
 						<p className="text-sm font-medium md:text-base">
 							{t("serverOverview.totalServers")}
@@ -83,7 +83,7 @@ export default function ServerOverview({
 					},
 				)}
 			>
-				<CardContent className="flex h-full items-center px-6 py-3">
+				<CardContent className="flex h-full min-h-[92px] items-center px-6 py-4">
 					<section className="flex flex-col gap-1">
 						<p className="text-sm font-medium md:text-base">
 							{t("serverOverview.onlineServers")}
@@ -109,16 +109,16 @@ export default function ServerOverview({
 					},
 				)}
 			>
-				<CardContent className="flex h-full items-center px-6 py-3">
-					<section className="flex min-w-0 flex-col gap-1 w-full">
+				<CardContent className="flex h-full min-h-[92px] items-center px-6 py-4">
+					<section className="flex min-w-0 flex-col gap-1.5 w-full">
 						<p className="text-sm font-medium md:text-base">流量</p>
-						<section className="flex min-w-0 flex-col gap-1 lg:flex-row lg:items-center lg:gap-2 lg:overflow-hidden">
-							<p className="flex items-center text-nowrap text-[11px] font-semibold text-blue-800 dark:text-blue-400 lg:shrink-0">
-								<ArrowUpCircleIcon className="size-3 mr-1" />
+						<section className="flex min-w-0 flex-col items-start gap-1 overflow-hidden">
+							<p className="flex items-center text-nowrap text-xs font-semibold text-blue-800 dark:text-blue-400">
+								<ArrowUpCircleIcon className="size-3.5 mr-1" />
 								{formatBytes(up)}
 							</p>
-							<p className="flex items-center text-nowrap text-[11px] font-semibold text-purple-800 dark:text-purple-400 lg:shrink-0">
-								<ArrowDownCircleIcon className="size-3 mr-1" />
+							<p className="flex items-center text-nowrap text-xs font-semibold text-purple-800 dark:text-purple-400">
+								<ArrowDownCircleIcon className="size-3.5 mr-1" />
 								{formatBytes(down)}
 							</p>
 						</section>
@@ -133,18 +133,18 @@ export default function ServerOverview({
 					},
 				)}
 			>
-				<CardContent className="flex h-full items-center relative px-6 py-3">
-					<section className="flex flex-col gap-1 w-full">
+				<CardContent className="flex h-full min-h-[92px] items-center relative px-6 py-4">
+					<section className="flex flex-col gap-1.5 w-full">
 						<div className="flex items-center w-full justify-between">
 							<p className="text-sm font-medium md:text-base">速度</p>
 						</div>
-						<section className="flex min-w-0 flex-col -mr-1 items-start gap-1 lg:flex-row lg:items-center lg:gap-2 lg:overflow-hidden">
-							<p className="text-[11px] flex items-center text-nowrap font-semibold">
-								<ArrowUpCircleIcon className="size-3 mr-0.5 sm:mb-px" />
+						<section className="flex min-w-0 flex-col items-start gap-1 overflow-hidden">
+							<p className="flex items-center text-nowrap text-xs font-semibold">
+								<ArrowUpCircleIcon className="size-3.5 mr-1 sm:mb-px" />
 								{formatSpeedCompact(upSpeed)}
 							</p>
-							<p className="text-[11px] flex items-center  text-nowrap font-semibold">
-								<ArrowDownCircleIcon className="size-3 mr-0.5" />
+							<p className="flex items-center text-nowrap text-xs font-semibold">
+								<ArrowDownCircleIcon className="size-3.5 mr-1" />
 								{formatSpeedCompact(downSpeed)}
 							</p>
 						</section>

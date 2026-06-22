@@ -94,6 +94,21 @@ function formatCycle(cycle?: string) {
 	}
 }
 
+function normalizePlanTag(value?: string) {
+	const tag = (value || "").trim();
+	if (!tag) return undefined;
+
+	if (/^(unlimited|unlimit|infinite|infinity|∞)$/i.test(tag)) {
+		return "不限量";
+	}
+
+	if (/^(不限|不限量|无限|无限制)$/.test(tag)) {
+		return "不限量";
+	}
+
+	return tag;
+}
+
 export type BillingDisplay = {
 	price: string;
 	remaining: string;
@@ -166,12 +181,12 @@ export function getPlanTags(parsedData?: PublicNoteData | null) {
 	const extraList = plan.extra ? plan.extra.split(",").filter(Boolean) : [];
 
 	return [
-		plan.bandwidth,
-		plan.trafficVol,
+		normalizePlanTag(plan.bandwidth),
+		normalizePlanTag(plan.trafficVol),
 		plan.IPv4 === "1" ? "IPv4" : undefined,
 		plan.IPv6 === "1" ? "IPv6" : undefined,
 		networkRoutes.length > 0 ? networkRoutes.join("｜") : undefined,
-		...extraList,
+		...extraList.map(normalizePlanTag),
 	].filter((tag): tag is string => Boolean(tag?.trim()));
 }
 

@@ -4,9 +4,11 @@ import {
 	formatNezhaInfo,
 	formatRelativeTime,
 	formatTime,
+	getBillingDisplay,
 	getDaysBetweenDates,
 	getDaysBetweenDatesWithAutoRenewal,
 	getNextCycleTime,
+	getPlanTags,
 	handlePublicNote,
 	nezhaFetcher,
 	parsePublicNote,
@@ -128,6 +130,20 @@ describe("date and billing helpers", () => {
 		expect(formatRelativeTime(Date.now() - 2 * 60 * 60 * 1000)).toBe("2h");
 		expect(formatRelativeTime(Date.now() - 3 * 24 * 60 * 60 * 1000)).toBe("3d");
 	});
+
+	it("formats localized billing amount and cycle labels", () => {
+		expect(
+			getBillingDisplay({
+				billingDataMod: {
+					startDate: "2025-01-01",
+					endDate: "2025-12-31",
+					autoRenewal: "0",
+					cycle: "Year",
+					amount: "243CNY",
+				},
+			}).price,
+		).toBe("¥243/年");
+	});
 });
 
 describe("public note helpers", () => {
@@ -222,6 +238,22 @@ describe("public note helpers", () => {
 
 	it("returns an empty public note when no live or cached note exists", () => {
 		expect(handlePublicNote(404, "")).toBe("");
+	});
+
+	it("normalizes English plan tags into Chinese display labels", () => {
+		expect(
+			getPlanTags({
+				planDataMod: {
+					bandwidth: "200Mb",
+					trafficVol: "Unlimited",
+					trafficType: "",
+					IPv4: "1",
+					IPv6: "",
+					networkRoute: "",
+					extra: " infinite ",
+				},
+			}),
+		).toEqual(["200Mb", "不限量", "IPv4", "不限量"]);
 	});
 });
 

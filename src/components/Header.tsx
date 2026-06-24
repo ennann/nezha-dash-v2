@@ -23,7 +23,7 @@ interface TimeState {
 	ss: number;
 }
 
-const DEFAULT_BRAND_LOGO = "/humanzoo-inline.png";
+const DEFAULT_BRAND_LOGO = "/humanzoo-inline.png?v=202606241650";
 const DEFAULT_FAVICON = "/humanzoo-favicon.ico";
 
 const useCurrentTime = () => {
@@ -134,10 +134,10 @@ function Header() {
 							alt={usesInlineBrandLogo ? siteName || "HumanZoo" : "site-logo"}
 							src={brandLogo}
 							className={cn(
-								"relative m-0! border-2 border-transparent h-6 object-top p-0!",
+								"relative m-0! h-6 object-top p-0!",
 								usesInlineBrandLogo
-									? "w-auto max-w-[42vw] object-contain object-left"
-									: "w-6 object-cover",
+									? "w-auto max-w-[42vw] border-0 object-contain object-left"
+									: "w-6 border-2 border-transparent object-cover",
 							)}
 						/>
 					</div>
